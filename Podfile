@@ -6,9 +6,9 @@ target 'GitHubSearch' do
   use_frameworks!
 
   # Pods for GitHubSearch
-  pod 'Moya/RxSwift'
+  pod 'Moya/RxSwift', '= 8.0.0-beta.5'
   pod 'Moya-ObjectMapper/RxSwift', :git => 'https://github.com/ivanbruel/Moya-ObjectMapper'
-  pod 'RxSwift', :git => 'https://github.com/ReactiveX/RxSwift'
+  pod 'RxCocoa',    '~> 3.0'
   pod 'SwiftSpinner'
 
 end

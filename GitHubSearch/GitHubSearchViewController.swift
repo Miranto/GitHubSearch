@@ -10,13 +10,14 @@ import UIKit
 import Moya
 import Moya_ObjectMapper
 import RxSwift
-import Alamofire
+import RxCocoa
 
 class GitHubSearchViewController: UIViewController {
   
   // MARK: Properties
   @IBOutlet weak var searchTableView: UITableView!
   @IBOutlet weak var searchBar: UISearchBar!
+  
   let disposeBag = DisposeBag()
   
   override func viewDidLoad() {
@@ -25,6 +26,34 @@ class GitHubSearchViewController: UIViewController {
   }
   
   override func viewWillAppear(_ animated: Bool) {
+    let provider = RxMoyaProvider<GitHubApi>()
+    
+    provider.request(.users(username: "miranto"))
+      .map { response -> Response in
+        
+        guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
+          let owner: AnyObject = responseDict["items"],
+          let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
+            return response
+        }
+        
+        let newResponse = Response(statusCode: response.statusCode, data: newData, response: response.response)
+        return newResponse
+      }
+      .mapArray(GitHubUser.self)
+      .subscribe { event -> Void in
+        switch event {
+        case .next(let response):
+          print("success")
+          print(response)
+          
+        //          self.repos = repos
+        case .error(let error):
+          print(error)
+        default:
+          break
+        }
+      }.addDisposableTo(disposeBag)
     
   }
 
