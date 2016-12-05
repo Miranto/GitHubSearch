@@ -8,8 +8,12 @@
 
 import UIKit
 
-class ViewController: UIViewController {
-
+class GitHubSearchViewController: UIViewController {
+  
+  // MARK: Properties
+  @IBOutlet weak var searchTableView: UITableView!
+  @IBOutlet weak var searchBar: UISearchBar!
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
