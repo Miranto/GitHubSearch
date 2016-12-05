@@ -7,16 +7,25 @@
 //
 
 import UIKit
+import Moya
+import Moya_ObjectMapper
+import RxSwift
+import Alamofire
 
 class GitHubSearchViewController: UIViewController {
   
   // MARK: Properties
   @IBOutlet weak var searchTableView: UITableView!
   @IBOutlet weak var searchBar: UISearchBar!
+  let disposeBag = DisposeBag()
   
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
+  }
+  
+  override func viewWillAppear(_ animated: Bool) {
+    
   }
 
   override func didReceiveMemoryWarning() {

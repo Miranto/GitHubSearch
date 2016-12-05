@@ -19,9 +19,9 @@ extension GitHubApi: TargetType {
   var path: String {
     switch self {
     case .repos(let name):
-      return "/search/repositories?q=\(name.utf8EncodedData)"
+      return "/search/repositories?q=\(name)"
     case .users(let name):
-      return "/search/users?q=\(name.utf8EncodedData)"
+      return "/search/users?q=\(name)"
     }
   }
   var method: Moya.Method {
@@ -30,6 +30,7 @@ extension GitHubApi: TargetType {
   var parameters: [String: Any]? {
     return nil
   }
+  
   var sampleData: Data {
     switch self {
     case .repos(_):

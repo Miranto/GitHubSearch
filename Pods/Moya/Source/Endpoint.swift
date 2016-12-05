@@ -32,8 +32,9 @@ open class Endpoint<Target> {
         parameters: [String: Any]? = nil,
         parameterEncoding: Moya.ParameterEncoding = URLEncoding.default,
         httpHeaderFields: [String: String]? = nil) {
-
-        self.url = url
+      
+      
+        self.url = url.removingPercentEncoding!
         self.sampleResponseClosure = sampleResponseClosure
         self.method = method
         self.parameters = parameters
