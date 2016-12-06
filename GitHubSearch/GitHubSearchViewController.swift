@@ -7,10 +7,11 @@
 //
 
 import UIKit
-import Moya
-import Moya_ObjectMapper
 import RxSwift
 import RxCocoa
+import RxOptional
+import Moya
+import Moya_ObjectMapper
 
 class GitHubSearchViewController: UIViewController {
   
@@ -18,19 +19,79 @@ class GitHubSearchViewController: UIViewController {
   @IBOutlet weak var searchTableView: UITableView!
   @IBOutlet weak var searchBar: UISearchBar!
   
+  let provider = RxMoyaProvider<GitHubApi>()
   let disposeBag = DisposeBag()
   
+  
+  // MARK: Lifecycles Methods
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
+    self.setupRx()
   }
   
   override func viewWillAppear(_ animated: Bool) {
-    let provider = RxMoyaProvider<GitHubApi>()
+    super.viewWillAppear(animated)
+  }
+  
+  func setupRx() {
+//    let usersSearchResults = searchBar.rx.text
+//      .throttle(0.3, scheduler: MainScheduler.instance)
+//      .distinctUntilChanged()
+//      .flatMapLatest { query -> Observable<[GitHubUser]> in
+//        if (query?.isEmpty)! {
+//          return .just([])
+//        }
+//        
+//        return self.findUser(query!)
+//          .catchErrorJustReturn([])
+//      }
+//      .observeOn(MainScheduler.instance)
     
-    provider.request(.users(username: "miranto"))
-      .map { response -> Response in
+//    usersSearchResults
+//      .bindTo(searchTableView.rx.items(cellIdentifier: "userCell")) {
+//        (index, user: GitHubUser, cell) in
+//        cell.textLabel?.text = user.login
+//        //        cell.detailTextLabel?.text = repository.url
+//      }
+//      .addDisposableTo(disposeBag)
+    
+    let reposSearchResults = searchBar.rx.text
+      .throttle(0.3, scheduler: MainScheduler.instance)
+      .distinctUntilChanged()
+      .flatMapLatest { query -> Observable<[GitHubRepo]> in
+        if (query?.isEmpty)! {
+          return .just([])
+        }
         
+        return self.findRepository(query!)
+          .catchErrorJustReturn([])
+      }
+      .observeOn(MainScheduler.instance)
+    
+//    let merge = Observable.combineLatest(usersSearchResults, reposSearchResults){
+//      return $0 + $1
+//    }
+    
+//    let mimi = Observable.merge([usersSearchResults, reposSearchResults])
+    
+    reposSearchResults
+      .bindTo(searchTableView.rx.items(cellIdentifier: "repoCell")) {
+        (index, repo: GitHubRepo, cell) in
+        cell.textLabel?.text = repo.name
+        //        cell.detailTextLabel?.text = repository.url
+      }
+      .addDisposableTo(disposeBag)
+    
+//    reposSearchResults
+//    .bindTo(searchTableView.rx.item
+  }
+  
+  
+  internal func findUser(_ name: String) -> Observable<[GitHubUser]> {
+    return self.provider
+      .request(.users(username: name))
+      .map { response -> Response in
         guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
           let owner: AnyObject = responseDict["items"],
           let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
@@ -41,27 +102,25 @@ class GitHubSearchViewController: UIViewController {
         return newResponse
       }
       .mapArray(GitHubUser.self)
-      .subscribe { event -> Void in
-        switch event {
-        case .next(let response):
-          print("success")
-          print(response)
-          
-        //          self.repos = repos
-        case .error(let error):
-          print(error)
-        default:
-          break
+      .asObservable()
+  }
+  
+  internal func findRepository(_ name: String) -> Observable<[GitHubRepo]> {
+    return self.provider
+      .request(.repos(username: name))
+      .map { response -> Response in
+        guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
+          let owner: AnyObject = responseDict["items"],
+          let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
+            return response
         }
-      }.addDisposableTo(disposeBag)
-    
+        
+        let newResponse = Response(statusCode: response.statusCode, data: newData, response: response.response)
+        return newResponse
+      }
+      .mapArray(GitHubRepo.self)
+      .asObservable()
   }
-
-  override func didReceiveMemoryWarning() {
-    super.didReceiveMemoryWarning()
-    // Dispose of any resources that can be recreated.
-  }
-
 
 }
 
