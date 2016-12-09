@@ -35,6 +35,8 @@ class GitHubSearchViewController: UIViewController {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
     self.setupRx()
+    self.searchTableView.delegate = self
+    self.searchTableView.dataSource = self
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -143,8 +145,7 @@ extension GitHubSearchViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     var cell: UITableViewCell!
     let cellData = data[indexPath.row]
-    print("lalala")
-    print(cellData)
+    
     switch cellData {
     case is GitHubUser:
       cell = tableView.dequeueReusableCell(withIdentifier: "userCell")!
@@ -157,5 +158,23 @@ extension GitHubSearchViewController: UITableViewDataSource {
     }
     
     return cell
+  }
+}
+
+extension GitHubSearchViewController: UITableViewDelegate {
+  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    let cellData = data[indexPath.row]
+    
+    switch cellData {
+    case is GitHubUser:
+      print("user cell")
+      
+      let userDetailsViewController = UserDetailsViewController()
+      
+      self.navigationController?.pushViewController(userDetailsViewController, animated: true)
+    default:
+      break
+    }
+    
   }
 }
