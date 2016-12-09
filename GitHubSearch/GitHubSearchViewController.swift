@@ -10,8 +10,10 @@ import UIKit
 import RxSwift
 import RxCocoa
 import RxOptional
+import RxDataSources
 import Moya
 import Moya_ObjectMapper
+import Async
 
 class GitHubSearchViewController: UIViewController {
   
@@ -21,6 +23,11 @@ class GitHubSearchViewController: UIViewController {
   
   let provider = RxMoyaProvider<GitHubApi>()
   let disposeBag = DisposeBag()
+  var data: [Any] = [Any]() {
+    didSet {
+      print("data count: \(data.count)")
+    }
+  }
   
   
   // MARK: Lifecycles Methods
@@ -35,63 +42,29 @@ class GitHubSearchViewController: UIViewController {
   }
   
   func setupRx() {
-//    let usersSearchResults = searchBar.rx.text
-//      .throttle(0.3, scheduler: MainScheduler.instance)
-//      .distinctUntilChanged()
-//      .flatMapLatest { query -> Observable<[GitHubUser]> in
-//        if (query?.isEmpty)! {
-//          return .just([])
-//        }
-//        
-//        return self.findUser(query!)
-//          .catchErrorJustReturn([])
-//      }
-//      .observeOn(MainScheduler.instance)
-    
-//    usersSearchResults
-//      .bindTo(searchTableView.rx.items(cellIdentifier: "userCell")) {
-//        (index, user: GitHubUser, cell) in
-//        cell.textLabel?.text = user.login
-//        //        cell.detailTextLabel?.text = repository.url
-//      }
-//      .addDisposableTo(disposeBag)
-    
-    let reposSearchResults = searchBar.rx.text
-      .throttle(0.3, scheduler: MainScheduler.instance)
-      .distinctUntilChanged()
-      .flatMapLatest { query -> Observable<[GitHubRepo]> in
-        if (query?.isEmpty)! {
-          return .just([])
-        }
-        
-        return self.findRepository(query!)
-          .catchErrorJustReturn([])
-      }
-      .observeOn(MainScheduler.instance)
-    
-//    let merge = Observable.combineLatest(usersSearchResults, reposSearchResults){
-//      return $0 + $1
-//    }
-    
-//    let mimi = Observable.merge([usersSearchResults, reposSearchResults])
-    
-    reposSearchResults
-      .bindTo(searchTableView.rx.items(cellIdentifier: "repoCell")) {
-        (index, repo: GitHubRepo, cell) in
-        cell.textLabel?.text = repo.name
-        //        cell.detailTextLabel?.text = repository.url
+    searchBar
+      .rx.text // Observable property thanks to RxCocoa
+      .filter { $0 != nil } // we can use RxOptional here, but just to show how to do it without
+      .map { $0! }
+      .debounce(0.5, scheduler: MainScheduler.instance) // Wait 0.5 for changes.
+      .distinctUntilChanged() // If they didn't occur, check if the new value is the same as old.
+      .filter { $0.characters.count > 0 } // If the new value is really new, filter for non-empty query.
+      .subscribe { [unowned self] (query) in // Here we subscribe to every new value, that is not empty (thanks to filter above).
+        print(query)
+        self.findUsersAndRepos(query.element!)
       }
       .addDisposableTo(disposeBag)
-    
-//    reposSearchResults
-//    .bindTo(searchTableView.rx.item
   }
   
   
-  internal func findUser(_ name: String) -> Observable<[GitHubUser]> {
-    return self.provider
-      .request(.users(username: name))
+  internal func findUsersAndRepos(_ name: String) {
+    let group = DispatchGroup()
+    data.removeAll()
+    group.enter()
+    
+    self.provider.request(.users(username: name))
       .map { response -> Response in
+        
         guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
           let owner: AnyObject = responseDict["items"],
           let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
@@ -102,13 +75,27 @@ class GitHubSearchViewController: UIViewController {
         return newResponse
       }
       .mapArray(GitHubUser.self)
-      .asObservable()
-  }
-  
-  internal func findRepository(_ name: String) -> Observable<[GitHubRepo]> {
-    return self.provider
-      .request(.repos(username: name))
+      .subscribe { event -> Void in
+        switch event {
+        case .next(let response):
+          print("success user")
+          
+          response.map{self.data.append($0)}
+          group.leave()
+ 
+        case .error(let error):
+          print(error)
+          print("error user")
+        default:
+          break
+        }
+      }.addDisposableTo(self.disposeBag)
+
+    group.enter()
+
+    self.provider.request(.repos(username: name))
       .map { response -> Response in
+        
         guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
           let owner: AnyObject = responseDict["items"],
           let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
@@ -119,8 +106,56 @@ class GitHubSearchViewController: UIViewController {
         return newResponse
       }
       .mapArray(GitHubRepo.self)
-      .asObservable()
+      .subscribe { event -> Void in
+        switch event {
+        case .next(let response):
+          print("success repo")
+          response.map{self.data.append($0)}
+          group.leave()
+
+        case .error(let error):
+          print(error)
+          print("error repo")
+        default:
+          break
+        }
+      }.addDisposableTo(self.disposeBag)
+  
+
+    group.notify(queue: DispatchQueue.main) {
+      print("group main")
+      self.searchTableView.reloadData()
+    }
+
   }
 
 }
 
+extension GitHubSearchViewController: UITableViewDataSource {
+  func numberOfSections(in tableView: UITableView) -> Int {
+    return 1
+  }
+  
+  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    return self.data.count
+  }
+  
+  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    var cell: UITableViewCell!
+    let cellData = data[indexPath.row]
+    print("lalala")
+    print(cellData)
+    switch cellData {
+    case is GitHubUser:
+      cell = tableView.dequeueReusableCell(withIdentifier: "userCell")!
+      cell.textLabel?.text = (cellData as! GitHubUser).login
+    case is GitHubRepo:
+      cell = tableView.dequeueReusableCell(withIdentifier: "repoCell")!
+      cell.textLabel?.text = (cellData as! GitHubRepo).name
+    default:
+      break
+    }
+    
+    return cell
+  }
+}

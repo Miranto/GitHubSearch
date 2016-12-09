@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "FD183DD841D291B28990C9CFA75A2F8E"
-               BuildableName = "Pods_GitHubSearch.framework"
-               BlueprintName = "Pods-GitHubSearch"
+               BlueprintIdentifier = "7F45F2F21482C3777494ACE42307212D"
+               BuildableName = "Async.framework"
+               BlueprintName = "AsyncSwift"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,9 +45,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "FD183DD841D291B28990C9CFA75A2F8E"
-            BuildableName = "Pods_GitHubSearch.framework"
-            BlueprintName = "Pods-GitHubSearch"
+            BlueprintIdentifier = "7F45F2F21482C3777494ACE42307212D"
+            BuildableName = "Async.framework"
+            BlueprintName = "AsyncSwift"
             ReferencedContainer = "container:Pods.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

@@ -11,6 +11,9 @@ target 'GitHubSearch' do
   pod 'Moya/RxSwift', '= 8.0.0-beta.5'
   pod 'Moya-ObjectMapper/RxSwift', :git => 'https://github.com/ivanbruel/Moya-ObjectMapper'
   pod 'RxCocoa',    '~> 3.0'
+  pod 'RxDataSources'
   pod 'SwiftSpinner'
+  pod 'AsyncSwift'
+  
 
 end
