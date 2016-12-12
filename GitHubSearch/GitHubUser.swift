@@ -15,6 +15,7 @@ class GitHubUser: Mappable {
   var login: String!
   var followers: String?
   var avatarUrl: String!
+  var numberOfStars: Int?
   
   required init?(map: Map) { }
   
