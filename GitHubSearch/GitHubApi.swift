@@ -12,6 +12,8 @@ import Moya
 enum GitHubApi {
   case repos(username: String)
   case users(username: String)
+  case singleUser(username: String)
+  case starredUser(username: String)
 }
 
 extension GitHubApi: TargetType {
@@ -22,6 +24,10 @@ extension GitHubApi: TargetType {
       return "/search/repositories?q=\(name)"
     case .users(let name):
       return "/search/users?q=\(name)"
+    case .singleUser(let name):
+      return "/users/\(name)"
+    case .starredUser(let name):
+      return "/users/\(name)/starred"
     }
   }
   var method: Moya.Method {
@@ -30,18 +36,21 @@ extension GitHubApi: TargetType {
   var parameters: [String: Any]? {
     return nil
   }
-  
   var sampleData: Data {
     switch self {
     case .repos(_):
       return "Test data".utf8EncodedData
     case .users(_):
       return "Test data".utf8EncodedData
+    case .singleUser(_):
+      return "Test data".utf8EncodedData
+    case .starredUser(_):
+      return "Test data".utf8EncodedData
     }
   }
   var task: Task {
     switch self {
-    case .users, .repos:
+    case .users, .repos, .singleUser, .starredUser:
       return .request
     }
   }
