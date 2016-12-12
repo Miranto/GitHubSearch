@@ -41,6 +41,10 @@ class GitHubSearchViewController: UIViewController {
     super.viewWillAppear(animated)
   }
   
+  override func viewDidAppear(_ animated: Bool) {
+    self.removeSearchTableViewOffset()
+  }
+  
   func setupRx() {
     searchBar
       .rx.text
@@ -140,6 +144,11 @@ class GitHubSearchViewController: UIViewController {
       self.searchTableView.reloadData()
     }
 
+  }
+  
+  func removeSearchTableViewOffset() {
+    self.searchTableView.contentOffset = CGPoint(x: 0.0, y: 0.0)
+    self.searchTableView.contentInset = UIEdgeInsetsMake(0.0, 0.0, 0.0, 0.0)
   }
 
   func sortResultsAscending(first: Any, next: Any) -> Bool{
