@@ -53,6 +53,16 @@ class GitHubSearchViewController: UIViewController {
         self.findUsersAndRepos(query.element!)
       }
       .addDisposableTo(disposeBag)
+    
+    searchBar
+      .rx.text
+      .filterNil()
+      .filter { $0.characters.count == 0 }
+      .subscribe {_ in
+        self.data.removeAll()
+        self.searchTableView.reloadData()
+      }
+      .addDisposableTo(disposeBag)
   }
   
   
