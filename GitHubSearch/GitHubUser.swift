@@ -11,6 +11,7 @@ import ObjectMapper
 
 class GitHubUser: Mappable {
   
+  var id: Int!
   var login: String!
   var followers: String?
   var avatarUrl: String!
@@ -19,6 +20,7 @@ class GitHubUser: Mappable {
   
   func mapping(map: Map) {
     print("map user")
+    id <- map["id"]
     login <- map["login"]
     followers <- map["followers"]
     avatarUrl <- map["avatar_url"]

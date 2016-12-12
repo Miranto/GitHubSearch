@@ -10,10 +10,8 @@ import UIKit
 import RxSwift
 import RxCocoa
 import RxOptional
-import RxDataSources
 import Moya
 import Moya_ObjectMapper
-import Async
 
 class GitHubSearchViewController: UIViewController {
   
@@ -45,13 +43,12 @@ class GitHubSearchViewController: UIViewController {
   
   func setupRx() {
     searchBar
-      .rx.text // Observable property thanks to RxCocoa
-      .filter { $0 != nil } // we can use RxOptional here, but just to show how to do it without
-      .map { $0! }
-      .debounce(0.5, scheduler: MainScheduler.instance) // Wait 0.5 for changes.
-      .distinctUntilChanged() // If they didn't occur, check if the new value is the same as old.
-      .filter { $0.characters.count > 0 } // If the new value is really new, filter for non-empty query.
-      .subscribe { [unowned self] (query) in // Here we subscribe to every new value, that is not empty (thanks to filter above).
+      .rx.text
+      .filterNil()
+      .debounce(0.5, scheduler: MainScheduler.instance)
+      .distinctUntilChanged()
+      .filter { $0.characters.count > 0 }
+      .subscribe { [unowned self] (query) in
         print(query)
         self.findUsersAndRepos(query.element!)
       }
@@ -83,6 +80,7 @@ class GitHubSearchViewController: UIViewController {
           print("success user")
           
           response.map{self.data.append($0)}
+
           group.leave()
  
         case .error(let error):
@@ -112,7 +110,9 @@ class GitHubSearchViewController: UIViewController {
         switch event {
         case .next(let response):
           print("success repo")
+          
           response.map{self.data.append($0)}
+          
           group.leave()
 
         case .error(let error):
@@ -126,11 +126,30 @@ class GitHubSearchViewController: UIViewController {
 
     group.notify(queue: DispatchQueue.main) {
       print("group main")
+      self.data.sort(by: self.sortResultsAscending)
       self.searchTableView.reloadData()
     }
 
   }
 
+  func sortResultsAscending(first: Any, next: Any) -> Bool{
+    var firstId = 0
+
+    if let firstUser = first as? GitHubUser {
+      firstId = firstUser.id
+    } else if let firstRepo = first as? GitHubRepo {
+      firstId = firstRepo.id
+    }
+    
+    var nextId = 0
+    if let nextUser = next as? GitHubUser {
+      nextId = nextUser.id
+    } else if let nextRepo = next as? GitHubRepo {
+      nextId = nextRepo.id
+    }
+    
+    return firstId < nextId
+  }
 }
 
 extension GitHubSearchViewController: UITableViewDataSource {
