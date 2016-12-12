@@ -7,14 +7,18 @@
 //
 
 import UIKit
+import Moya
+import RxSwift
 
 class UserDetailsViewController: UIViewController {
   
-  var userName: String!
+  var user: GitHubUser!
+  let provider = RxMoyaProvider<GitHubApi>()
+  let disposeBag = DisposeBag()
   
-  init(userName: String) {
+  init(user: GitHubUser) {
     super.init(nibName: nil, bundle: nil)
-    self.userName = userName
+    self.user = user
   }
   
   required init?(coder aDecoder: NSCoder) {
@@ -26,11 +30,9 @@ class UserDetailsViewController: UIViewController {
     
     // Do any additional setup after loading the view.
   }
-  
-  override func didReceiveMemoryWarning() {
-    super.didReceiveMemoryWarning()
-    // Dispose of any resources that can be recreated.
+  override func viewWillAppear(_ animated: Bool) {
+    
   }
-  
+
   
 }

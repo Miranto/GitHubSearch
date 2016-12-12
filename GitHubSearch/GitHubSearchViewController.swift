@@ -206,8 +206,8 @@ extension GitHubSearchViewController: UITableViewDelegate {
     switch cellData {
     case is GitHubUser:
       print("user cell")
-      let login = (cellData as! GitHubUser).login
-      let userDetailsViewController = UserDetailsViewController(userName: login!)
+    
+      let userDetailsViewController = UserDetailsViewController(user: cellData as! GitHubUser)
       
       self.navigationController?.pushViewController(userDetailsViewController, animated: true)
     default:
