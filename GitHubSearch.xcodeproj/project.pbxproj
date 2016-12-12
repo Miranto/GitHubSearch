@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0435B76DBE065726B0D06004 /* Pods_GitHubSearch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 062722029CB423C8A31D2B18 /* Pods_GitHubSearch.framework */; };
+		611BE90A1DFECB8F00556E89 /* UIImageView+ImageFromUrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611BE9091DFECB8F00556E89 /* UIImageView+ImageFromUrl.swift */; };
 		615F50C31DF570FA00C0CE62 /* GitHubUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615F50C21DF570FA00C0CE62 /* GitHubUser.swift */; };
 		615F50C61DF5751B00C0CE62 /* GitHubRepo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615F50C51DF5751B00C0CE62 /* GitHubRepo.swift */; };
 		61938FD61DF55F7400784D63 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61938FD51DF55F7400784D63 /* AppDelegate.swift */; };
@@ -23,6 +24,7 @@
 /* Begin PBXFileReference section */
 		062722029CB423C8A31D2B18 /* Pods_GitHubSearch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GitHubSearch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D1C71DE8FA39690F944B64A /* Pods-GitHubSearch.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GitHubSearch.debug.xcconfig"; path = "Pods/Target Support Files/Pods-GitHubSearch/Pods-GitHubSearch.debug.xcconfig"; sourceTree = "<group>"; };
+		611BE9091DFECB8F00556E89 /* UIImageView+ImageFromUrl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImageView+ImageFromUrl.swift"; sourceTree = "<group>"; };
 		615F50C21DF570FA00C0CE62 /* GitHubUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GitHubUser.swift; sourceTree = "<group>"; };
 		615F50C51DF5751B00C0CE62 /* GitHubRepo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GitHubRepo.swift; sourceTree = "<group>"; };
 		61938FD21DF55F7400784D63 /* GitHubSearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GitHubSearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -99,6 +101,7 @@
 			children = (
 				61938FD51DF55F7400784D63 /* AppDelegate.swift */,
 				61938FD71DF55F7400784D63 /* GitHubSearchViewController.swift */,
+				611BE9091DFECB8F00556E89 /* UIImageView+ImageFromUrl.swift */,
 				61BFD7441DFAE6C000469684 /* UserDetailsViewController.swift */,
 				61BFD7461DFAF5D500469684 /* UserDetailsViewController.xib */,
 				615F50C41DF5710300C0CE62 /* Models */,
@@ -246,6 +249,7 @@
 				61938FEA1DF568E100784D63 /* GitHubApi.swift in Sources */,
 				615F50C31DF570FA00C0CE62 /* GitHubUser.swift in Sources */,
 				61BFD7451DFAE6C000469684 /* UserDetailsViewController.swift in Sources */,
+				611BE90A1DFECB8F00556E89 /* UIImageView+ImageFromUrl.swift in Sources */,
 				61938FD81DF55F7400784D63 /* GitHubSearchViewController.swift in Sources */,
 				615F50C61DF5751B00C0CE62 /* GitHubRepo.swift in Sources */,
 				61938FD61DF55F7400784D63 /* AppDelegate.swift in Sources */,

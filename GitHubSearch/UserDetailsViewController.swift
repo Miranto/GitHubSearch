@@ -12,16 +12,16 @@ import RxSwift
 
 class UserDetailsViewController: UIViewController {
   
-  var user: GitHubUser! {
-    didSet {
-      print("stars: \(user.numberOfStars)")
-      print("followers: \(user.followers)")
-      
-    }
-  }
+  // MARK: Properties
+  @IBOutlet weak var avatar: UIImageView!
+  @IBOutlet weak var stars: UILabel!
+  @IBOutlet weak var followers: UILabel!
+  
+  var user: GitHubUser!
   let provider = RxMoyaProvider<GitHubApi>()
   let disposeBag = DisposeBag()
   
+  // MARK: Init Methods
   init(user: GitHubUser) {
     super.init(nibName: nil, bundle: nil)
     self.user = user
@@ -31,25 +31,43 @@ class UserDetailsViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
   
+  // MARK: Lifecycles Methods
   override func viewDidLoad() {
     super.viewDidLoad()
     
     // Do any additional setup after loading the view.
   }
+  
   override func viewWillAppear(_ animated: Bool) {
-    self.downloadUser(name: user.login)
-    self.downloadStarredUser(name: user.login)
+    self.setupView()
+    self.downloadUserData()
   }
   
-  func downloadUser(name: String) {
+  // MARK: View Methods
+  func setupView() {
+    self.title = self.user.login
+    self.followers.text = "Number of followers:"
+    self.stars.text = "Number of stars:"
+  }
+  
+  // MARK: Networking Methods
+  func downloadUserData() {
+    self.downloadFollowingUser(name: user.login)
+    self.downloadStarredUser(name: user.login)
+    self.downloadUserAvatar(avatarURL: user.avatarUrl)
+  }
+  
+  func downloadFollowingUser(name: String) {
     self.provider.request(.singleUser(username: name))
       .mapObject(GitHubUser.self)
       .subscribe { event -> Void in
         switch event {
         case .next(let response):
           print("success user")
-          
+
           self.user.followers = response.followers
+          self.followers.text  = "Number of followers: \n\(self.user.followers!)"
+          self.followers.sizeToFit()
         case .error(let error):
           print(error)
           print("error user")
@@ -68,14 +86,20 @@ class UserDetailsViewController: UIViewController {
           let responseDict = try? response.mapJSON() as! [[String: AnyObject]]
           
           self.user.numberOfStars = responseDict?.count ?? 0
+          self.stars.text  = "Number of stars: \n\(self.user.numberOfStars!)"
+          self.stars.sizeToFit()
         case .error(let error):
           print(error)
           print("error starred")
         default:
           break
         }
-    }
-    .addDisposableTo(self.disposeBag)
+    }.addDisposableTo(self.disposeBag)
   }
+  
+  func downloadUserAvatar(avatarURL: String) {
+    self.avatar.setImageFromURl(stringImageUrl: avatarURL)
+  }
+  
   
 }

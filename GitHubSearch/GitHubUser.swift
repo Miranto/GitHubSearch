@@ -13,7 +13,7 @@ class GitHubUser: Mappable {
   
   var id: Int!
   var login: String!
-  var followers: String?
+  var followers: Int?
   var avatarUrl: String!
   var numberOfStars: Int?
   
