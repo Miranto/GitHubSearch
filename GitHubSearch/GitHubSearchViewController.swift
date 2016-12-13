@@ -18,7 +18,7 @@ class GitHubSearchViewController: UIViewController {
   // MARK: Properties
   @IBOutlet weak var searchTableView: UITableView!
   @IBOutlet weak var searchBar: UISearchBar!
-  
+  var searchViewModel: SearchViewModel!
   let provider = RxMoyaProvider<GitHubApi>()
   let disposeBag = DisposeBag()
   var data: [Any] = [Any]() {
@@ -26,8 +26,7 @@ class GitHubSearchViewController: UIViewController {
       print("data count: \(data.count)")
     }
   }
-  
-  
+
   // MARK: Lifecycles Methods
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -35,6 +34,8 @@ class GitHubSearchViewController: UIViewController {
     self.setupRx()
     self.searchTableView.delegate = self
     self.searchTableView.dataSource = self
+    
+    
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -45,7 +46,11 @@ class GitHubSearchViewController: UIViewController {
     self.removeSearchTableViewOffset()
   }
   
+  //MARK: Setup RX
   func setupRx() {
+    
+    searchViewModel = SearchViewModel(provider: provider)
+    
     searchBar
       .rx.text
       .filterNil()
@@ -54,7 +59,10 @@ class GitHubSearchViewController: UIViewController {
       .filter { $0.characters.count > 0 }
       .subscribe { [unowned self] (query) in
         print(query)
-        self.findUsersAndRepos(query.element!)
+        self.searchViewModel.findUsersAndRepos(query.element!, completion: { (data) in
+          self.data = data
+          self.searchTableView.reloadData()
+        })
       }
       .addDisposableTo(disposeBag)
     
@@ -67,108 +75,15 @@ class GitHubSearchViewController: UIViewController {
         self.searchTableView.reloadData()
       }
       .addDisposableTo(disposeBag)
-  }
-  
-  
-  internal func findUsersAndRepos(_ name: String) {
-    let group = DispatchGroup()
-    data.removeAll()
-    group.enter()
     
-    self.provider.request(.users(username: name))
-      .map { response -> Response in
-        
-        guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
-          let owner: AnyObject = responseDict["items"],
-          let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
-            return response
-        }
-        
-        let newResponse = Response(statusCode: response.statusCode, data: newData, response: response.response)
-        return newResponse
-      }
-      .mapArray(GitHubUser.self)
-      .subscribe { event -> Void in
-        switch event {
-        case .next(let response):
-          print("success user")
-          
-          response.map{self.data.append($0)}
-
-          group.leave()
- 
-        case .error(let error):
-          print(error)
-          print("error user")
-        default:
-          break
-        }
-      }.addDisposableTo(self.disposeBag)
-
-    group.enter()
-
-    self.provider.request(.repos(username: name))
-      .map { response -> Response in
-        
-        guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
-          let owner: AnyObject = responseDict["items"],
-          let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
-            return response
-        }
-        
-        let newResponse = Response(statusCode: response.statusCode, data: newData, response: response.response)
-        return newResponse
-      }
-      .mapArray(GitHubRepo.self)
-      .subscribe { event -> Void in
-        switch event {
-        case .next(let response):
-          print("success repo")
-          
-          response.map{self.data.append($0)}
-          
-          group.leave()
-
-        case .error(let error):
-          print(error)
-          print("error repo")
-        default:
-          break
-        }
-      }.addDisposableTo(self.disposeBag)
-  
-
-    group.notify(queue: DispatchQueue.main) {
-      print("group main")
-      self.data.sort(by: self.sortResultsAscending)
-      self.searchTableView.reloadData()
-    }
-
   }
   
+  // MARK: Helpers Merhods
   func removeSearchTableViewOffset() {
     self.searchTableView.contentOffset = CGPoint(x: 0.0, y: 0.0)
     self.searchTableView.contentInset = UIEdgeInsetsMake(0.0, 0.0, 0.0, 0.0)
   }
-
-  func sortResultsAscending(first: Any, next: Any) -> Bool{
-    var firstId = 0
-
-    if let firstUser = first as? GitHubUser {
-      firstId = firstUser.id
-    } else if let firstRepo = first as? GitHubRepo {
-      firstId = firstRepo.id
-    }
-    
-    var nextId = 0
-    if let nextUser = next as? GitHubUser {
-      nextId = nextUser.id
-    } else if let nextRepo = next as? GitHubRepo {
-      nextId = nextRepo.id
-    }
-    
-    return firstId < nextId
-  }
+  
 }
 
 extension GitHubSearchViewController: UITableViewDataSource {
