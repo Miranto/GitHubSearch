@@ -17,7 +17,6 @@ class UserDetailsViewController: UIViewController {
   @IBOutlet weak var stars: UILabel!
   @IBOutlet weak var followers: UILabel!
   
-//  var userDetailsViewModel: UserDetailsViewModel
   var user: GitHubUser!
   let provider = RxMoyaProvider<GitHubApi>()
   let disposeBag = DisposeBag()
@@ -41,7 +40,6 @@ class UserDetailsViewController: UIViewController {
   
   override func viewWillAppear(_ animated: Bool) {
     self.setupView()
-//    self.downloadUserData()
     
     let userDetailsViewModel = UserDetailsViewModel(provider: provider, name: user.login!)
     

@@ -34,7 +34,7 @@ open class Endpoint<Target> {
         httpHeaderFields: [String: String]? = nil) {
       
       
-        self.url = url.removingPercentEncoding!
+        self.url = url
         self.sampleResponseClosure = sampleResponseClosure
         self.method = method
         self.parameters = parameters

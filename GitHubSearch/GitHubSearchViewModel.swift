@@ -22,15 +22,14 @@ class GitHubSearchViewModel {
   }
   
   // MARK: Networking
-  internal func findUsersAndRepos(_ name: String, completion: @escaping ([Any]) -> Void) {
+  func findUsersAndRepos(_ name: String, completion: @escaping ([Any]) -> Void) {
     let group = DispatchGroup()
     var data: [Any] = [Any]()
-//    data.removeAll()
+
     group.enter()
     
     self.provider.request(.users(username: name))
       .map { response -> Response in
-        
         guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
           let owner: AnyObject = responseDict["items"],
           let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
@@ -62,7 +61,6 @@ class GitHubSearchViewModel {
     
     self.provider.request(.repos(username: name))
       .map { response -> Response in
-        
         guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
           let owner: AnyObject = responseDict["items"],
           let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {

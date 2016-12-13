@@ -8,6 +8,12 @@
 
 import Foundation
 import Moya
+//
+let endpointClosure = {
+  (target: GitHubApi) -> Endpoint<GitHubApi> in
+  let url = URL(string: target.baseURL.absoluteString + target.path)?.absoluteString
+  return Endpoint(url: url!, sampleResponseClosure: { .networkResponse(200, target.sampleData) }, method: target.method, parameters: target.parameters)
+}
 
 enum GitHubApi {
   case repos(username: String)

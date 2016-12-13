@@ -16,10 +16,15 @@ import Moya_ObjectMapper
 class GitHubSearchViewController: UIViewController {
   
   // MARK: Properties
+//  let endpointClosure = {
+//    (target: GitHubApi) -> Endpoint<GitHubApi> in
+//    let url = URL(string: target.path)?.absoluteString
+//    return Endpoint(url: url!, sampleResponseClosure: { .networkResponse(200, target.sampleData) }, method: target.method, parameters: target.parameters)
+//  }
   @IBOutlet weak var searchTableView: UITableView!
   @IBOutlet weak var searchBar: UISearchBar!
   var searchViewModel: GitHubSearchViewModel!
-  let provider = RxMoyaProvider<GitHubApi>()
+  let provider = RxMoyaProvider<GitHubApi>(endpointClosure: endpointClosure)
   let disposeBag = DisposeBag()
   var data: [Any] = [Any]() {
     didSet {
@@ -34,12 +39,6 @@ class GitHubSearchViewController: UIViewController {
     self.setupRx()
     self.searchTableView.delegate = self
     self.searchTableView.dataSource = self
-    
-    
-  }
-  
-  override func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(animated)
   }
   
   override func viewDidAppear(_ animated: Bool) {
@@ -48,7 +47,6 @@ class GitHubSearchViewController: UIViewController {
   
   //MARK: Setup RX
   func setupRx() {
-    
     searchViewModel = GitHubSearchViewModel(provider: provider)
     
     searchBar
@@ -70,7 +68,7 @@ class GitHubSearchViewController: UIViewController {
       .rx.text
       .filterNil()
       .filter { $0.characters.count == 0 }
-      .subscribe {_ in
+      .subscribe { _ in
         self.data.removeAll()
         self.searchTableView.reloadData()
       }
@@ -121,8 +119,6 @@ extension GitHubSearchViewController: UITableViewDelegate {
     
     switch cellData {
     case is GitHubUser:
-      print("user cell")
-    
       let userDetailsViewController = UserDetailsViewController(user: cellData as! GitHubUser)
       
       self.navigationController?.pushViewController(userDetailsViewController, animated: true)
