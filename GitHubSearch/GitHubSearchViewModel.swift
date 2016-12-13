@@ -44,8 +44,10 @@ class GitHubSearchViewModel {
         switch event {
         case .next(let response):
           print("success user")
-          
-          response.map{data.append($0)}
+//          let mm = response.flatMap{$0}
+//          print(mm)
+          data = [data, response].reduce([],+)
+//          print(data)
           
           group.leave()
           
@@ -76,7 +78,7 @@ class GitHubSearchViewModel {
         case .next(let response):
           print("success repo")
           
-          response.map{data.append($0)}
+          data = [data, response].reduce([],+)
           
           group.leave()
           
