@@ -20,7 +20,6 @@ class GitHubUser: Mappable {
   required init?(map: Map) { }
   
   func mapping(map: Map) {
-    print("map user")
     id <- map["id"]
     login <- map["login"]
     followers <- map["followers"]
