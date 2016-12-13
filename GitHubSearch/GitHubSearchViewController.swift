@@ -18,7 +18,7 @@ class GitHubSearchViewController: UIViewController {
   // MARK: Properties
   @IBOutlet weak var searchTableView: UITableView!
   @IBOutlet weak var searchBar: UISearchBar!
-  var searchViewModel: SearchViewModel!
+  var searchViewModel: GitHubSearchViewModel!
   let provider = RxMoyaProvider<GitHubApi>()
   let disposeBag = DisposeBag()
   var data: [Any] = [Any]() {
@@ -49,7 +49,7 @@ class GitHubSearchViewController: UIViewController {
   //MARK: Setup RX
   func setupRx() {
     
-    searchViewModel = SearchViewModel(provider: provider)
+    searchViewModel = GitHubSearchViewModel(provider: provider)
     
     searchBar
       .rx.text

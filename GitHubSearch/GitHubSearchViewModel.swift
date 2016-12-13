@@ -11,7 +11,7 @@ import Moya
 import RxOptional
 import RxSwift
 
-class SearchViewModel {
+class GitHubSearchViewModel {
   
   // MARK: Properties
   let provider: RxMoyaProvider<GitHubApi>
