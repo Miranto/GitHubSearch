@@ -17,6 +17,7 @@ class UserDetailsViewController: UIViewController {
   @IBOutlet weak var stars: UILabel!
   @IBOutlet weak var followers: UILabel!
   
+//  var userDetailsViewModel: UserDetailsViewModel
   var user: GitHubUser!
   let provider = RxMoyaProvider<GitHubApi>()
   let disposeBag = DisposeBag()
@@ -40,7 +41,23 @@ class UserDetailsViewController: UIViewController {
   
   override func viewWillAppear(_ animated: Bool) {
     self.setupView()
-    self.downloadUserData()
+//    self.downloadUserData()
+    
+    let userDetailsViewModel = UserDetailsViewModel(provider: provider, name: user.login!)
+    
+    userDetailsViewModel.downloadFollowingUser(name: user.login)
+      .map{String(describing: "Number of followers:\n\($0.followers!)")}
+      .bindTo(self.followers.rx.text)
+      .addDisposableTo(self.disposeBag)
+    
+    userDetailsViewModel.downloadStarredUser(name: user.login)
+      .map{String(describing: "Number of stars:\n\($0)")}
+      .bindTo(self.stars.rx.text)
+      .addDisposableTo(self.disposeBag)
+    
+    userDetailsViewModel.downloadUserAvatar(avatarURL: user.avatarUrl, completion: {(image) in
+      self.avatar.image = image
+    })
   }
   
   // MARK: View Methods
@@ -48,57 +65,6 @@ class UserDetailsViewController: UIViewController {
     self.title = self.user.login
     self.followers.text = "Number of followers:"
     self.stars.text = "Number of stars:"
-  }
-  
-  // MARK: Networking Methods
-  func downloadUserData() {
-    self.downloadFollowingUser(name: user.login)
-    self.downloadStarredUser(name: user.login)
-    self.downloadUserAvatar(avatarURL: user.avatarUrl)
-  }
-  
-  func downloadFollowingUser(name: String) {
-    self.provider.request(.singleUser(username: name))
-      .mapObject(GitHubUser.self)
-      .subscribe { event -> Void in
-        switch event {
-        case .next(let response):
-          print("success user")
-
-          self.user.followers = response.followers
-          self.followers.text  = "Number of followers: \n\(self.user.followers!)"
-          self.followers.sizeToFit()
-        case .error(let error):
-          print(error)
-          print("error user")
-        default:
-          break
-        }
-      }.addDisposableTo(self.disposeBag)
-  }
-  
-  func downloadStarredUser(name: String) {
-    self.provider.request(.starredUser(username: name))
-      .subscribe { event -> Void in
-        switch event {
-        case .next(let response):
-          print("success starred")
-          let responseDict = try? response.mapJSON() as! [[String: AnyObject]]
-          
-          self.user.numberOfStars = responseDict?.count ?? 0
-          self.stars.text  = "Number of stars: \n\(self.user.numberOfStars!)"
-          self.stars.sizeToFit()
-        case .error(let error):
-          print(error)
-          print("error starred")
-        default:
-          break
-        }
-    }.addDisposableTo(self.disposeBag)
-  }
-  
-  func downloadUserAvatar(avatarURL: String) {
-    self.avatar.setImageFromURl(stringImageUrl: avatarURL)
   }
   
   
