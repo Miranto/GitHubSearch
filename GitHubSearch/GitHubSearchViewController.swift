@@ -47,7 +47,7 @@ class GitHubSearchViewController: UIViewController {
     searchBar
       .rx.text
       .filterNil()
-      .debounce(0.5, scheduler: MainScheduler.instance)
+      .debounce(0.3, scheduler: MainScheduler.instance)
       .distinctUntilChanged()
       .filter { $0.characters.count > 0 }
       .subscribe { [unowned self] (query) in
