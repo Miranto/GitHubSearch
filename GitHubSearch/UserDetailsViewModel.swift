@@ -16,25 +16,25 @@ struct UserDetailsViewModel {
   // MARK: Properties
   let provider: RxMoyaProvider<GitHubApi>
   let disposeBag = DisposeBag()
-  let name: String
+  let user: GitHubUser
   
   
   // MARK: Networking Methods
-  func downloadFollowingUser(name: String) -> Observable<GitHubUser>{
-    return self.provider.request(.singleUser(username: name))
+  func downloadFollowingUser() -> Observable<GitHubUser>{
+    return self.provider.request(.singleUser(username: user.login))
       .mapObject(GitHubUser.self)
   }
   
-  func downloadStarredUser(name: String) -> Observable<String> {
-    return self.provider.request(.starredUser(username: name))
+  func downloadStarredUser() -> Observable<String> {
+    return self.provider.request(.starredUser(username: user.login))
       .map { event -> String in
         let responseDict = try? event.mapJSON() as! [[String: AnyObject]]
         return String(responseDict?.count ?? 0)
     }
   }
 
-  func downloadUserAvatar(avatarURL: String, completion: @escaping (UIImage) -> Void) {
-    completion(self.setImageFromURl(stringImageUrl: avatarURL))
+  func downloadUserAvatar(completion: @escaping (UIImage) -> Void) {
+    completion(self.setImageFromURl(stringImageUrl: user.avatarUrl))
   }
 
   func setImageFromURl(stringImageUrl url: String) -> UIImage {

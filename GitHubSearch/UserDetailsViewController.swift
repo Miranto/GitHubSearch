@@ -41,19 +41,19 @@ class UserDetailsViewController: UIViewController {
   override func viewWillAppear(_ animated: Bool) {
     self.setupView()
     
-    let userDetailsViewModel = UserDetailsViewModel(provider: provider, name: user.login!)
+    let userDetailsViewModel = UserDetailsViewModel(provider: provider, user: user)
     
-    userDetailsViewModel.downloadFollowingUser(name: user.login)
+    userDetailsViewModel.downloadFollowingUser()
       .map{String(describing: "Number of followers:\n\($0.followers!)")}
       .bindTo(self.followers.rx.text)
       .addDisposableTo(self.disposeBag)
     
-    userDetailsViewModel.downloadStarredUser(name: user.login)
+    userDetailsViewModel.downloadStarredUser()
       .map{String(describing: "Number of stars:\n\($0)")}
       .bindTo(self.stars.rx.text)
       .addDisposableTo(self.disposeBag)
     
-    userDetailsViewModel.downloadUserAvatar(avatarURL: user.avatarUrl, completion: {(image) in
+    userDetailsViewModel.downloadUserAvatar(completion: {(image) in
       self.avatar.image = image
     })
   }
