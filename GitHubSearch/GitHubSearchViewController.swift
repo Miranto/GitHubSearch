@@ -16,11 +16,6 @@ import Moya_ObjectMapper
 class GitHubSearchViewController: UIViewController {
   
   // MARK: Properties
-//  let endpointClosure = {
-//    (target: GitHubApi) -> Endpoint<GitHubApi> in
-//    let url = URL(string: target.path)?.absoluteString
-//    return Endpoint(url: url!, sampleResponseClosure: { .networkResponse(200, target.sampleData) }, method: target.method, parameters: target.parameters)
-//  }
   @IBOutlet weak var searchTableView: UITableView!
   @IBOutlet weak var searchBar: UISearchBar!
   var searchViewModel: GitHubSearchViewModel!

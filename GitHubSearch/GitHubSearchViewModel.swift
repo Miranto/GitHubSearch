@@ -95,20 +95,27 @@ class GitHubSearchViewModel {
   }
   
   // MARK: Helpers Methods
-  func sortResultsAscending(first: Any, next: Any) -> Bool{
+  func sortResultsAscending(first: Any, next: Any) -> Bool {
     var firstId = 0
     
-    if let firstUser = first as? GitHubUser {
-      firstId = firstUser.id
-    } else if let firstRepo = first as? GitHubRepo {
-      firstId = firstRepo.id
+    switch first {
+    case is GitHubUser:
+      firstId = (first as! GitHubUser).id
+    case is GitHubRepo:
+      firstId = (first as! GitHubRepo).id
+    default:
+      break
     }
-    
+
     var nextId = 0
-    if let nextUser = next as? GitHubUser {
-      nextId = nextUser.id
-    } else if let nextRepo = next as? GitHubRepo {
-      nextId = nextRepo.id
+    
+    switch next {
+    case is GitHubUser:
+      nextId = (next as! GitHubUser).id
+    case is GitHubRepo:
+      nextId = (next as! GitHubRepo).id
+    default:
+      break
     }
     
     return firstId < nextId
