@@ -44,7 +44,7 @@ struct UserDetailsViewModel {
         image = UIImage(data: data as Data)!
       }
     }
-    return image ?? UIImage()
+    return image ?? UIImage(named: "placeholder.png")!
   }
   
 }
