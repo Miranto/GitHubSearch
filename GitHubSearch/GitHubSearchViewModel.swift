@@ -22,29 +22,19 @@ class GitHubSearchViewModel {
   }
   
   // MARK: Networking
-  func findUsersAndRepos(_ name: String, completion: @escaping ([Any]) -> Void) {
+  func findUsersAndRepos(_ name: String, completion: @escaping ([Any], _ failure: Bool) -> Void) {
     let group = DispatchGroup()
     var data: [Any] = [Any]()
+    var limitAPI: Bool = false
 
     group.enter()
     
-    self.provider.request(.users(username: name))
-      .map { response -> Response in
-        guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
-          let owner: AnyObject = responseDict["items"],
-          let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
-            return response
-        }
-        
-        let newResponse = Response(statusCode: response.statusCode, data: newData, response: response.response)
-        return newResponse
-      }
-      .mapArray(GitHubUser.self)
+    self.findUsers(name: name)
       .subscribe { event -> Void in
         switch event {
         case .next(let response):
           print("success user")
-
+          
           data = [data, response].reduce([],+)
           
           group.leave()
@@ -52,6 +42,8 @@ class GitHubSearchViewModel {
         case .error(let error):
           print(error)
           print("error user")
+          limitAPI = true
+          group.leave()
         default:
           break
         }
@@ -59,18 +51,7 @@ class GitHubSearchViewModel {
     
     group.enter()
     
-    self.provider.request(.repos(username: name))
-      .map { response -> Response in
-        guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
-          let owner: AnyObject = responseDict["items"],
-          let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
-            return response
-        }
-        
-        let newResponse = Response(statusCode: response.statusCode, data: newData, response: response.response)
-        return newResponse
-      }
-      .mapArray(GitHubRepo.self)
+    self.findRepos(name: name)
       .subscribe { event -> Void in
         switch event {
         case .next(let response):
@@ -83,15 +64,48 @@ class GitHubSearchViewModel {
         case .error(let error):
           print(error)
           print("error repo")
+          limitAPI = true
+          group.leave()
         default:
           break
         }
       }.addDisposableTo(self.disposeBag)
     
     group.notify(queue: DispatchQueue.main) {
-      completion(data.sorted(by: self.sortResultsAscending))
+      completion(data.sorted(by: self.sortResultsAscending), limitAPI)
     }
     
+  }
+  
+  func findUsers(name: String) -> Observable<[GitHubUser]> {
+    return self.provider.request(.users(username: name))
+      .map { response -> Response in
+        guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
+          let owner: AnyObject = responseDict["items"],
+          let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
+            return response
+        }
+        
+        let newResponse = Response(statusCode: response.statusCode, data: newData, response: response.response)
+        return newResponse
+      }
+      .mapArray(GitHubUser.self)
+  }
+  
+  func findRepos(name: String) -> Observable<[GitHubRepo]> {
+    return self.provider.request(.repos(username: name))
+      .map { response -> Response in
+        guard let responseDict = try? response.mapJSON() as! [String:AnyObject],
+          let owner: AnyObject = responseDict["items"],
+          let newData = try? JSONSerialization.data(withJSONObject: owner, options: JSONSerialization.WritingOptions.prettyPrinted) else {
+            return response
+        }
+        
+        let newResponse = Response(statusCode: response.statusCode, data: newData, response: response.response)
+        return newResponse
+      }
+      .mapArray(GitHubRepo.self)
+
   }
   
   // MARK: Helpers Methods

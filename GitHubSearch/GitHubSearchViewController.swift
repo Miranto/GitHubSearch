@@ -52,7 +52,11 @@ class GitHubSearchViewController: UIViewController {
       .filter { $0.characters.count > 0 }
       .subscribe { [unowned self] (query) in
         print(query)
-        self.searchViewModel.findUsersAndRepos(query.element!, completion: { (data) in
+        self.searchViewModel.findUsersAndRepos(query.element!, completion: { (data, limitAPI) in
+          print("limit api", limitAPI)
+          if limitAPI {
+            self.showErroralert()
+          }
           self.data = data
           self.searchTableView.reloadData()
         })
@@ -75,6 +79,12 @@ class GitHubSearchViewController: UIViewController {
   func removeSearchTableViewOffset() {
     self.searchTableView.contentOffset = CGPoint(x: 0.0, y: 0.0)
     self.searchTableView.contentInset = UIEdgeInsetsMake(0.0, 0.0, 0.0, 0.0)
+  }
+  
+  func showErroralert() {
+    let alert = UIAlertController(title: "Warning", message: "You reached API requests limit. Please wait a while and try again.", preferredStyle: UIAlertControllerStyle.alert)
+    alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+    self.present(alert, animated: true, completion: nil)
   }
   
 }
